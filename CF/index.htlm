@@ -1,1 +1,5 @@
-hi conflit 
+<<<<<<< HEAD
+hi conflit
+resolving conflit
+hi conflit
+>>>>>>> qa
