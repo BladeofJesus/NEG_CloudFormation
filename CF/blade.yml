@@ -1,0 +1,86 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: A sample template
+Resources:
+ NEGVPC:
+  Type: AWS::EC2::VPC
+  Properties:
+    CidrBlock: 10.0.0.0/16
+    EnableDnsSupport: 'true'
+    EnableDnsHostnames: 'true'
+    Tags:
+     - Key: Name
+       Value: NEGVPC
+ NEGInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+      - Key: Name
+        Value: NEGInternetGateway
+ NEGAttachGateway:
+  Type: AWS::EC2::VPCGatewayAttachment
+  Properties:
+    VpcId:
+       Ref: NEGVPC
+    InternetGatewayId:
+       Ref: NEGInternetGateway
+ NEGPUBSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: NEGVPC
+      CidrBlock: 10.0.0.0/24
+      AvailabilityZone: "us-east-1a"
+      MapPublicIpOnLaunch: 'true'
+      Tags:
+      - Key: Name
+        Value: NEGPUBSubnet     
+ NEGPRIVATESubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: NEGVPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: "us-east-1b"
+      MapPublicIpOnLaunch: 'false'
+      Tags:
+      - Key: Name
+        Value: NEGPRIVATESubnet          
+ NEGPUBRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:  
+        Ref: NEGVPC
+      Tags:
+      - Key: Name
+        Value: NEGPUBRouteTable  
+ NEGPRIVRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:  
+        Ref: NEGVPC
+      Tags:
+      - Key: Name
+        Value: NEGPRIVRouteTable  
+ NEGIGWRoute:
+    Type: AWS::EC2::Route
+    DependsOn: NEGAttachGateway
+    Properties:
+       RouteTableId:
+         Ref: NEGPUBRouteTable
+       DestinationCidrBlock: 0.0.0.0/0
+       GatewayId:
+         Ref:  NEGInternetGateway 
+ NEGPUBSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: NEGPUBSubnet
+      RouteTableId:
+        Ref: NEGPUBRouteTable 
+ NEGPRIVSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: NEGPRIVATESubnet
+      RouteTableId:
+        Ref: NEGPRIVRouteTable                 
